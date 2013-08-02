@@ -10,6 +10,7 @@ init = function() {
 
 TestApp = Core.extend(Echo.Application, {
 
+    _contentPane: null,
     _mainSplitPane: null,
     _chkBigData: null,
     _chkHeader: null,
@@ -25,15 +26,15 @@ TestApp = Core.extend(Echo.Application, {
     $construct: function() {
         Echo.Application.call(this);
         
-        var contentPane = new Echo.ContentPane();
-        this.rootComponent.add(contentPane);
+        this._contentPane = new Echo.ContentPane();
+        this.rootComponent.add(this._contentPane);
 
         this._mainSplitPane = new Echo.SplitPane({
              orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT,
              resizable: true,
              separatorPosition: "220px"
         });
-        contentPane.add(this._mainSplitPane);
+        this._contentPane.add(this._mainSplitPane);
         
         var controlsColumn = new Echo.Column();
         this._mainSplitPane.add(controlsColumn);
@@ -89,7 +90,7 @@ TestApp = Core.extend(Echo.Application, {
         controlsColumn.add(this._chkBigData);
 
         this._chkExtraCols = new Echo.CheckBox({
-            selected: true,
+            selected: false,
             text: "Extra Columns",
             events: {
                 action: doAction
@@ -134,7 +135,7 @@ TestApp = Core.extend(Echo.Application, {
             text: "Width = null",
             id: "null"
         }];
-        cboWidthAttr.selectedId = "null";
+        cboWidthAttr.selectedId = "100pc";
         cboWidthAttr.events = {
             action: doAction
         };
@@ -151,7 +152,7 @@ TestApp = Core.extend(Echo.Application, {
             text: "Height = null",
             id: null
         }];
-        cboHeightAttr.selectedId = "320px";
+        cboHeightAttr.selectedId = "80%";
         cboHeightAttr.events = {
             action: doAction
         };
@@ -165,10 +166,10 @@ TestApp = Core.extend(Echo.Application, {
             text: "Split panes",
             id: "split"
         }, {
-            text: "Imilia",
-            id: "imilia"
+            text: "Window",
+            id: "window"
         }];
-        cboContainerAttr.selectedId = "split";
+        cboContainerAttr.selectedId = "window";
         cboContainerAttr.events = {
             action: doAction
         };
@@ -223,11 +224,17 @@ TestApp = Core.extend(Echo.Application, {
             splitPane.add(tableContainer);
             tableContainer.add(new Echo.Label());
             break;
-        case "imilia":
-            add(tableContainer = new Echo.WindowPane({
+        case "window":
+            tableContainer = new Echo.WindowPane({
                 styleName: "Default",
-                title: "This is a Window"
-            }));
+                title: "This is a Window",
+                background: "#ddafdd",
+                width: "400px",
+                height: "300px",
+                positionY: "80px",
+                border: null
+            });
+            this._contentPane.add(tableContainer);
         }
 
         var tableWidth = null;

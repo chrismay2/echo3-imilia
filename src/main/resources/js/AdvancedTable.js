@@ -424,11 +424,17 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
             // adjust header to body column widths if not already set in method _buildColGroup()
             if (!this._explicitColWidths) {
                 for (var j = 0; j < firstBodyRow.cells.length; j++) {
+                    if (firstBodyRow.cells[j].style.minWidth) break;
                     var borderWidth = (j === 0 ? 2 : 1) * this._verticalOffset;
                     var w1 = this._tableHeader.rows[0].cells[j].offsetWidth - borderWidth;
+                    firstBodyRow.cells[j].style.minWidth = w1 + "px";                    
+                }
+                for (var j = 0; j < firstBodyRow.cells.length; j++) {
+                    var borderWidth = (j === 0 ? 2 : 1) * this._verticalOffset;
+                    //var w1 = this._tableHeader.rows[0].cells[j].offsetWidth - borderWidth;
                     var w2 = firstBodyRow.cells[j].offsetWidth - borderWidth;
-                    var minWidth = Math.max(w1, w2);
-                    this._resizeColumn(minWidth, true, j);
+                    var minWidth = w2;  //Math.max(w1, w2);
+                    this._resizeColumn(minWidth, false, j);
                 }
             }
         }

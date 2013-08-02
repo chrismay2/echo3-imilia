@@ -31,21 +31,17 @@ package com.imilia.echo3.test;
 
 import nextapp.echo.app.ApplicationInstance;
 import nextapp.echo.app.Window;
-import nextapp.echo.app.serial.SerialPeerFactory;
 import nextapp.echo.webcontainer.SynchronizePeerFactory;
 
 import com.imilia.echo3.AdvancedTable;
 import com.imilia.echo3.AdvancedTablePeer;
-import com.imilia.echo3.Stroke;
-import com.imilia.echo3.StrokePeer;
 
 
 public class InteractiveApp extends ApplicationInstance {
 
-    static {
-        SynchronizePeerFactory.registerSynchronizePeer(AdvancedTable.class, new AdvancedTablePeer());   
-        SerialPeerFactory.forClassLoader(InteractiveApp.class.getClassLoader()).registerSerialPeer(Stroke.class, new StrokePeer());
-    }
+//    static {
+//        SynchronizePeerFactory.registerSynchronizePeer(AdvancedTable.class, new AdvancedTablePeer());   
+//    }
 
     private Window mainWindow;
 

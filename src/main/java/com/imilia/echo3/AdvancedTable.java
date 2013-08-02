@@ -34,6 +34,7 @@ import nextapp.echo.app.Extent;
 import nextapp.echo.app.FillImage;
 import nextapp.echo.app.Insets;
 import nextapp.echo.app.Table;
+import nextapp.echo.webcontainer.SynchronizePeerFactory;
 
 
 /**
@@ -46,6 +47,10 @@ import nextapp.echo.app.Table;
  */
 public class AdvancedTable extends Table {
     
+    static {
+        SynchronizePeerFactory.registerSynchronizePeer(AdvancedTable.class, new AdvancedTablePeer());   
+    }
+
     public static final String PROPERTY_HEIGHT = "height";
     public static final String PROPERTY_RESIZEHANDLE_BACKGROUND = "resizeHandleBackground"; 
     public static final String PROPERTY_RESIZEHANDLE_FILLIMAGE = "resizeHandleFillImage";     
