@@ -377,7 +377,7 @@ TestApp = Core.extend(Echo.Application, {
             attr.zebraBackground = "#eeeeee";
         }
 
-        var table = new Echo.Sync.AdvancedTable(attr);
+        var table = new Echo.AdvancedTable(attr);
         tableContainer.add(table);
     }
 });
