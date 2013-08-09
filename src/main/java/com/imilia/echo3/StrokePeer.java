@@ -118,7 +118,7 @@ public class StrokePeer implements SerialPropertyPeer {
         propertyElement.appendChild(serialContext.getDocument().createTextNode(toString((Stroke) propertyValue)));
     }
 
-    @Override
+   // @Override
     public Object toProperty(Context context, Class objectClass, Element propertyElement) throws SerialException {
         String value = DomUtil.getElementText(propertyElement);
         if (value == null) {

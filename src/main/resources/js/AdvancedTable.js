@@ -294,8 +294,8 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
 
         var outsets = this.component.render("outsets");
         if (outsets) {
-            // XXX use box-sizing: border-box;?
-            // create an outer div for the outsets
+            //create an outer div for the outsets
+            //alternatively: use box-sizing: border-box;?
             this._outerDiv = document.createElement("div");
             this._outerDiv.id = this.component.renderId;
             Echo.Sync.Insets.render(outsets, this._outerDiv, "padding");
@@ -406,11 +406,11 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
         if (this._headerVisible) {
             headerHeight = this._tableHeader.clientHeight;
         }
-
+        
         if (this._table.rows.length === 0) {
             return;
         }
-        
+
         var firstBodyRow = this._table.rows[0];
 
         if (this._headerVisible) {
@@ -424,17 +424,17 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
             // adjust header to body column widths if not already set in method _buildColGroup()
             if (!this._explicitColWidths) {
                 for (var j = 0; j < firstBodyRow.cells.length; j++) {
-                    if (firstBodyRow.cells[j].style.minWidth) break;
                     var borderWidth = (j === 0 ? 2 : 1) * this._verticalOffset;
                     var w1 = this._tableHeader.rows[0].cells[j].offsetWidth - borderWidth;
-                    firstBodyRow.cells[j].style.minWidth = w1 + "px";                    
+                    if (w1 > 0) {
+                        //set minWidth so column headers don't get squeezed
+                    	firstBodyRow.cells[j].style.minWidth = w1 + "px";
+                    }                    
                 }
-                for (var j = 0; j < firstBodyRow.cells.length; j++) {
-                    var borderWidth = (j === 0 ? 2 : 1) * this._verticalOffset;
-                    //var w1 = this._tableHeader.rows[0].cells[j].offsetWidth - borderWidth;
-                    var w2 = firstBodyRow.cells[j].offsetWidth - borderWidth;
-                    var minWidth = w2;  //Math.max(w1, w2);
-                    this._resizeColumn(minWidth, false, j);
+                for (var k = 0; k < firstBodyRow.cells.length; k++) {
+                    var borderWidth = (k === 0 ? 2 : 1) * this._verticalOffset;
+                    var w2 = firstBodyRow.cells[k].offsetWidth - borderWidth;
+                    this._resizeColumn(w2, this._manualColWidths, k);
                 }
             }
         }
@@ -495,9 +495,11 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
     },
 
     /**
-     * Build a colgroup element in case the column widths are specified in percentages If column widths are specified in
-     * pixel then enforce widths directly on the columns (no colgroup is returned) If column widths are not specified
-     * then nothing happens here The case of a mixed-up configuration is undefined
+     * Build a colgroup element in case the column widths are specified in percentages 
+     * If column widths are specified in pixel then enforce widths directly on the 
+     * columns (no colgroup is returned) 
+     * If column widths are not specified then nothing happens here 
+     * The case of a mixed-up configuration is undefined
      */
     _buildColGroup: function() {
         var colGroupElement = document.createElement("colgroup");
@@ -511,6 +513,7 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
                 colElement.style.width = width.toString();
                 colGroupElement.appendChild(colElement);
             } else {
+                //manually resize
                 var columnPixels = Echo.Sync.Extent.toPixels(width, true);
                 this._resizeColumn(columnPixels, true, i);
                 var borderWidth = (i === 0 ? 2 : 1) * this._verticalOffset;
@@ -623,7 +626,7 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var child = this.component.getComponent((rowIndex + (this._headerVisible ? 1 : 0)) * this._columnCount + columnIndex);
             if (!child) {
-                break; // XXX ?
+                break; // should never happen?
             }
             var cellDiv = document.createElement("div");
             if (rowIndex === Echo.AdvancedTableSync._HEADER_ROW) {
@@ -644,7 +647,8 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
                 resizeHandle.style.styleFloat = "right"; // IE only
                 resizeHandle.style.cssFloat = 'right';
                 resizeHandle.style.width = Echo.AdvancedTableSync._RESIZE_HANDLE_WIDTH + "px";
-                resizeHandle.style.height = "30px"; // XXX
+                resizeHandle.style.marginBottom = "-500px";  //see http://stackoverflow.com/questions/791231/css-sidebar-height-100
+                resizeHandle.style.paddingBottom = "500px";
                 td.appendChild(resizeHandle);
 
                 // add mouse listener
@@ -688,7 +692,20 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
                 return false;
             }
         }
+
         // full update
+        if (this._manualColWidths && this._table.rows.length > 0) {
+            //if columns have been resized then store the current column sizes
+            var columnWidths = [];
+            var firstBodyRow = this._table.rows[0];
+            for (var i = 0; i < firstBodyRow.cells.length; i++) {
+                var borderWidth = (i === 0 ? 2 : 1) * this._verticalOffset;
+                var w2 = firstBodyRow.cells[i].offsetWidth - borderWidth;
+                columnWidths[i] = w2 + "px";
+            }            
+            this.component.set("columnWidth", columnWidths);
+        }
+        
         var element = this._outerDiv ? this._outerDiv : this._div;
         var containerElement = element.parentNode;
         Echo.Render.renderComponentDispose(update, update.parent);
@@ -705,6 +722,7 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
         if (width < 1) {
             return;
         }
+        
         var headerWidth = width - this._defaultPixelInsets.left - Echo.AdvancedTableSync._RESIZE_HANDLE_WIDTH;
         var bodyWidth = width - this._defaultPixelInsets.left - this._defaultPixelInsets.right;
         var id = this._getCssId(col);
@@ -769,6 +787,7 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
             var firstBodyRow = this._table.rows[0];
             for (var i = 0; i < firstBodyRow.cells.length; i++) {
                 var w = firstBodyRow.cells[i].offsetWidth - borderWidth;
+                firstBodyRow.cells[i].style.minWidth = "1px";
                 this._resizeColumn(w, true, i);
                 if (i === listener._col) {
                     this._cellWidth = w;
@@ -788,12 +807,13 @@ Echo.AdvancedTableSync = Core.extend(Echo.Render.ComponentSync, {
 
     _onMove: function(listener, delta) {
         listener._startX += delta.x;
-        var w = this._cellWidth + listener._startX;
+        var newWidth = this._cellWidth + listener._startX;
         // respect minimum size
-        if (w < 18) {
+        if (newWidth < 18) {
             return;
         }
-        this._resizeColumn(w, true, listener._col);
+        this._resizeColumn(newWidth, true, listener._col);
+        //if table width is not set then calculate it and set it accordingly
         if (!this._width) {
             var tableWidth = parseInt(this._div.style.width, 10);
             this._div.style.width = (tableWidth + delta.x) + "px";

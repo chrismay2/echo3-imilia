@@ -20,8 +20,10 @@ TestApp = Core.extend(Echo.Application, {
     _cboCols: null,
     _chkRadius: null,
     _chkShadow: null,
+    _chkResizeBackground: null,
     _chkExtraCols: null,
     _cboContainer: null,
+    _table: null,
 
     $construct: function() {
         Echo.Application.call(this);
@@ -80,6 +82,15 @@ TestApp = Core.extend(Echo.Application, {
         });
         controlsColumn.add(this._chkShadow);
 
+        this._chkResizeBackground = new Echo.CheckBox({
+            selected: false,
+            text: "Resize Handle",
+            events: {
+                action: doAction
+            }
+        });
+        controlsColumn.add(this._chkResizeBackground);
+
         this._chkBigData = new Echo.CheckBox({
             selected: true,
             text: "Extra Rows",
@@ -90,7 +101,7 @@ TestApp = Core.extend(Echo.Application, {
         controlsColumn.add(this._chkBigData);
 
         this._chkExtraCols = new Echo.CheckBox({
-            selected: false,
+            selected: true,
             text: "Extra Columns",
             events: {
                 action: doAction
@@ -135,7 +146,7 @@ TestApp = Core.extend(Echo.Application, {
             text: "Width = null",
             id: "null"
         }];
-        cboWidthAttr.selectedId = "100pc";
+        cboWidthAttr.selectedId = "500px";
         cboWidthAttr.events = {
             action: doAction
         };
@@ -152,7 +163,7 @@ TestApp = Core.extend(Echo.Application, {
             text: "Height = null",
             id: null
         }];
-        cboHeightAttr.selectedId = "80%";
+        cboHeightAttr.selectedId = "320px";
         cboHeightAttr.events = {
             action: doAction
         };
@@ -169,7 +180,7 @@ TestApp = Core.extend(Echo.Application, {
             text: "Window",
             id: "window"
         }];
-        cboContainerAttr.selectedId = "window";
+        cboContainerAttr.selectedId = "simple";
         cboContainerAttr.events = {
             action: doAction
         };
@@ -267,12 +278,23 @@ TestApp = Core.extend(Echo.Application, {
                 "Joyce Ming", "$200", "$35", "Andy", "James Albert Pentel", "$175", "$25", "Annie"];
         var children = [];
         var z = 0;
+        var that = this;
+        var bla = true;
         for ( var i = 0; i < childrenTexts.length; i++) {
             if (i < 4) {
                 children[z++] = new Echo.Button({
                     text: childrenTexts[i],
                     border: "1px solid #665566",
-                    icon: "img/test.png"
+                    icon: "img/test.png",
+                    events: {
+                        action: function() {
+                            //that._table.set("selection", "4");
+                            var color = bla ? "#ffaadd" : "#aaffdd";
+                            bla = !bla;
+                            that._table.set("verticalLine", "3px solid " + color);
+                        }
+                    }
+
                 });
             } else if (i === 12) {
                 children[z++] = new Echo.CheckBox({
@@ -316,6 +338,7 @@ TestApp = Core.extend(Echo.Application, {
             headerVisible: this._chkHeader.get("selected"),
             radius: this._chkRadius.get("selected") ? "20px" : null,
             boxShadow: this._chkShadow.get("selected") ? "3px 3px 12px 2px black" : null,
+            resizeHandleBackground: this._chkResizeBackground.get("selected") ? "#aaaaff" : null,
             selectionEnabled: true,
             selectionBackground: "#ffccaa",
             children: children
@@ -384,7 +407,7 @@ TestApp = Core.extend(Echo.Application, {
             attr.zebraBackground = "#eeeeee";
         }
 
-        var table = new Echo.AdvancedTable(attr);
-        tableContainer.add(table);
+        this._table = new Echo.AdvancedTable(attr);
+        tableContainer.add(this._table);
     }
 });
